@@ -6,6 +6,8 @@ from sqlmodel import SQLModel, Field, Session, create_engine, select
 from typing import List, Dict
 from collections import defaultdict
 import os
+import re
+from sqlalchemy.pool import QueuePool
 
 app = FastAPI()
 
@@ -26,15 +28,63 @@ class Selection(SQLModel, table=True):
     people: int
     work: int
 
-# Update database configuration
-DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///database.db")
+def mask_database_url(url: str) -> str:
+    """Mask sensitive information in database URL."""
+    if url.startswith("postgresql://"):
+        # Use regex to mask username and password
+        masked = re.sub(
+            r"postgresql://[^:]+:[^@]+@",
+            "postgresql://****:****@",
+            url
+        )
+        return masked
+    return url
+
+# Update database configuration with PostgreSQL support
+DATABASE_URL = os.environ.get("DATABASE_URL", "sqlite:///database.db")
+
+# Convert Heroku style postgres:// URLs to postgresql://
 if DATABASE_URL.startswith("postgres://"):
     DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
 
-engine = create_engine(DATABASE_URL, echo=False)  # Changed echo to False
+# Print masked database URL at startup
+print(f"Database URL: {mask_database_url(DATABASE_URL)}")
+
+# Configure the engine based on database type
+if DATABASE_URL.startswith("postgresql://"):
+    # PostgreSQL specific configuration
+    engine = create_engine(
+        DATABASE_URL,
+        echo=False,
+        poolclass=QueuePool,
+        pool_size=5,
+        max_overflow=10,
+        pool_timeout=30,
+        pool_pre_ping=True,
+        pool_recycle=1800,
+        connect_args={
+            "sslmode": "require" if os.environ.get("PRODUCTION", "false").lower() == "true" else "prefer"
+        }
+    )
+else:
+    # SQLite configuration (default)
+    engine = create_engine(
+        DATABASE_URL,
+        echo=False,
+        connect_args={"check_same_thread": False}
+    )
 
 # Create the database tables
-SQLModel.metadata.create_all(engine)
+def init_db():
+    try:
+        SQLModel.metadata.create_all(engine)
+    except Exception as e:
+        print(f"Error initializing database: {e}")
+
+# Initialize database on startup
+@app.on_event("startup")
+async def on_startup():
+    init_db()
 
 # Mount static files - update the mounting structure
 app.mount("/static", StaticFiles(directory="static"), name="static")

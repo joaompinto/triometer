@@ -1,0 +1,142 @@
+.chart-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 30px;
+    width: 100%;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.chart-container {
+    background: #262626;
+    padding: 20px 20px 15px 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    min-height: 400px;
+    display: flex;
+    flex-direction: column;
+    transition: min-height 0.3s ease;
+}
+
+.chart-container.table-expanded {
+    min-height: 700px;
+}
+
+.chart-container h2 {
+    margin: 0 0 20px 0;
+    font-size: 1.2em;
+    color: #e0e0e0;
+    text-align: center;
+}
+
+.table-container {
+    margin-top: 20px;
+    overflow-x: auto;
+    width: 100%;
+    max-height: 0;
+    opacity: 0;
+    transition: max-height 0.3s ease, opacity 0.3s ease;
+}
+
+.table-container.expanded {
+    max-height: 300px;
+    opacity: 1;
+}
+
+.table-container.collapsed {
+    display: none;
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    font-size: 14px;
+}
+
+.data-table th,
+.data-table td {
+    border: 1px solid #4a4a4a;
+    padding: 8px;
+    text-align: center;
+    color: #e0e0e0;
+}
+
+.data-table th {
+    background-color: #3a3a3a;
+    font-weight: bold;
+}
+
+.data-table tr:nth-child(even) {
+    background-color: #2a2a2a;
+}
+
+.data-table tr:hover {
+    background-color: #3a3a3a;
+}
+
+.toggle-table-btn {
+    display: block;
+    width: 100%;
+    padding: 8px;
+    margin-top: 15px;
+    background: #3a3a3a;
+    border: 1px solid #4a4a4a;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    color: #e0e0e0;
+    transition: background-color 0.2s;
+}
+
+.toggle-table-btn:hover {
+    background-color: #4a4a4a;
+}
+
+.toggle-table-btn .toggle-icon {
+    display: inline-block;
+    margin-left: 5px;
+    transition: transform 0.2s;
+}
+
+.toggle-table-btn[aria-expanded="true"] .toggle-icon {
+    transform: rotate(180deg);
+}
+
+.loading, .no-data {
+    text-align: center;
+    padding: 20px;
+    color: #b0b0b0;
+}
+
+.error {
+    color: #ff6b6b;
+    text-align: center;
+    padding: 20px;
+}
+
+#backBtn {
+    padding: 8px 16px;
+    font-size: 16px;
+    cursor: pointer;
+    margin-top: 20px;
+    background-color: #3a3a3a;
+    color: #e0e0e0;
+    border: 1px solid #4a4a4a;
+}
+
+#backBtn:hover {
+    background-color: #4a4a4a;
+}
+
+@media (min-width: 1200px) {
+    .chart-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .chart-container:last-child {
+        grid-column: 1 / -1;
+        max-width: 800px;
+        margin: 0 auto;
+    }
+}

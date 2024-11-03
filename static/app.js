@@ -1,3 +1,5 @@
+import { calculateProximity, validateSelection, normalizeProximities } from './js/proximity.js';
+
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 const info = document.getElementById('info');
@@ -192,14 +194,6 @@ function isPointInTriangle(px, py) {
     return s > 0 && t > 0 && 1 - s - t > 0;
 }
 
-function calculateProximity(x1, y1, x2, y2) {
-    const distance = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
-    // Use height as the reference distance since it's the maximum possible
-    const maxDistance = height;
-    const scaledProximity = 1 + 9 * (1 - distance / maxDistance);
-    return Math.min(Math.max(Math.round(scaledProximity), 1), 10);
-}
-
 let isDragging = false;
 
 function handleMouseDown(event) {
@@ -296,13 +290,14 @@ function updateProximitySymbols(proximities = []) {
     // Sort the pairs by proximity in descending order
     labelProximityPairs.sort((a, b) => b.proximity - a.proximity);
 
+    // Add individual rows without total
     labelProximityPairs.forEach((pair) => {
         const row = document.createElement('div');
         row.className = 'proximity-row';
 
         const labelText = document.createElement('div');
         labelText.textContent = pair.text;
-        labelText.style.width = '60px'; // Reduced width
+        labelText.style.width = '60px';
 
         const symbols = document.createElement('div');
         symbols.className = 'symbols';
@@ -327,12 +322,16 @@ function redrawCanvas() {
     drawCenterDot();
 
     if (selectedPoint) {
-        const proximities = triangle.map((vertex) => {
-            return calculateProximity(selectedPoint.x, selectedPoint.y, vertex.x, vertex.y);
+        let proximities = triangle.map((vertex) => {
+            return calculateProximity(selectedPoint.x, selectedPoint.y, vertex.x, vertex.y, height);
         });
+        
+        // Normalize proximities to sum to 12
+        proximities = normalizeProximities(proximities);
+        
         updateProximitySymbols(proximities);
 
-        ctx.fillStyle = '#90EE90'; // Changed from '#4a9eff' to light green
+        ctx.fillStyle = '#90EE90';
         ctx.beginPath();
         ctx.arc(selectedPoint.x, selectedPoint.y, 5, 0, 2 * Math.PI);
         ctx.fill();
@@ -341,20 +340,26 @@ function redrawCanvas() {
     }
 }
 
-function validateSelection(proximities) {
-    const validValues = proximities.every(p => p.proximity >= 1 && p.proximity <= 10);
-    return validValues;
-}
-
 async function handleSubmit() {
     if (!selectedPoint) return;
 
     submitBtn.disabled = true;
     submitBtn.textContent = 'Submitting...';
 
-    const proximities = triangle.map((vertex, index) => ({
+    let rawProximities = triangle.map((vertex, index) => ({
         label: labels[index].text,
-        proximity: calculateProximity(selectedPoint.x, selectedPoint.y, vertex.x, vertex.y)
+        proximity: calculateProximity(selectedPoint.x, selectedPoint.y, vertex.x, vertex.y, height)
+    }));
+
+    // Get just the proximity values
+    let proximityValues = rawProximities.map(p => p.proximity);
+    // Normalize them to sum to 12
+    let normalizedValues = normalizeProximities(proximityValues);
+    
+    // Update the proximities object with normalized values
+    const proximities = rawProximities.map((p, i) => ({
+        ...p,
+        proximity: normalizedValues[i]
     }));
 
     if (!validateSelection(proximities)) {
@@ -363,10 +368,9 @@ async function handleSubmit() {
             .join('\n');
         
         alert(
-            'Please select a more definitive position by moving your point closer to one of the corners.\n\n' +
+            'Invalid selection. The sum of all proximities must equal 12.\n\n' +
             'Current values:\n' +
-            proximityMessage +
-            '\n\nValues must be between 1 and 10, with at least one value 7 or higher.'
+            proximityMessage
         );
         
         submitBtn.disabled = false;
