@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Work Motivation Distribution</title>
+    <link rel="stylesheet" href="/static/css/styles.css"> <!-- Updated CSS path -->
+</head>
+<body>
+    <div class="container">
+        <div id="locationInfo">Loading location...</div> <!-- Renamed from countryInfo to locationInfo and updated text -->
+
+        <h2 id="title">What motivates more on your current job?</h2> <!-- Added title element -->
+        <canvas id="canvas" width="500" height="450"></canvas>
+        <div id="info">Click inside the triangle to select a position</div>
+        <div class="symbols-box">
+            <div id="proximitySymbols"></div>
+        </div>
+        <button id="submitBtn">Submit Selection</button>
+        <button id="showResultsBtn">Show Results</button> <!-- Added Show Results button -->
+    </div>
+
+    <script src="static/app.js"></script>
+</body>
+</html>

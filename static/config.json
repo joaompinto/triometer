@@ -1,0 +1,17 @@
+{
+    "title": "What motivates more on your current job?",
+    "vertices": [
+        {
+            "text": "Salary",
+            "position": "top"
+        },
+        {
+            "text": "People",
+            "position": "left"
+        },
+        {
+            "text": "Work",
+            "position": "right"
+        }
+    ]
+}

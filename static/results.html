@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Work Motivation Survey Results</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Work Motivation Survey Results</h1>
+        
+        <div class="chart-grid">
+            <div class="chart-container">
+                <h2>Participants by Country</h2>
+                <canvas id="participantsChart"></canvas>
+                <button class="toggle-table-btn" data-target="participantsTable">
+                    Show Data Table <span class="toggle-icon">▼</span>
+                </button>
+                <div class="table-container collapsed" id="participantsTable">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Country</th>
+                                <th>Participants</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <div class="chart-container">
+                <h2>Motivation Distribution by Country</h2>
+                <canvas id="motivationsChart"></canvas>
+                <button class="toggle-table-btn" data-target="motivationsTable">
+                    Show Data Table <span class="toggle-icon">▼</span>
+                </button>
+                <div class="table-container collapsed" id="motivationsTable">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Country</th>
+                                <th>Salary</th>
+                                <th>People</th>
+                                <th>Work</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <div class="chart-container">
+                <h2>Global Motivation Distribution</h2>
+                <canvas id="globalChart"></canvas>
+                <button class="toggle-table-btn" data-target="globalTable">
+                    Show Data Table <span class="toggle-icon">▼</span>
+                </button>
+                <div class="table-container collapsed" id="globalTable">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Category</th>
+                                <th>Average Score</th>
+                                <th>Percentage</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <button id="backBtn">Back to Survey</button>
+    </div>
+    <script src="/static/results.js"></script>
+</body>
+</html>
