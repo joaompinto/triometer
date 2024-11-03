@@ -10,8 +10,13 @@
     <div class="container">
         <div id="locationInfo">Loading location...</div> <!-- Renamed from countryInfo to locationInfo and updated text -->
 
-        <h2 id="title">What motivates more on your current job?</h2> <!-- Added title element -->
-        <canvas id="canvas" width="500" height="450"></canvas>
+        <h2 id="title">What motivates you more in your current job?</h2>
+        <div id="canvasContainer" style="position: relative;">
+            <canvas id="canvas" width="500" height="450"></canvas>
+            <div id="labelSalary" class="vertex-label"></div>
+            <div id="labelPeople" class="vertex-label"></div>
+            <div id="labelWork" class="vertex-label"></div>
+        </div>
         <div id="info">Click inside the triangle to select a position</div>
         <div class="symbols-box">
             <div id="proximitySymbols"></div>

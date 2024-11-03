@@ -10,9 +10,9 @@ const showResultsBtn = document.getElementById('showResultsBtn'); // Added line
 const sideLength = Math.min(window.innerWidth * 0.6, 400); // Reduced from 0.8 to 0.6, max 400
 const height = (Math.sqrt(3) / 2) * sideLength;
 
-// Set canvas size with more padding
-canvas.width = sideLength + 160;  // Increased padding from 100 to 160
-canvas.height = height + 160;     // Increased padding from 100 to 160
+// Set canvas size with less padding
+canvas.width = sideLength + 80;  // Reduced padding from 160 to 80
+canvas.height = height + 80;     // Reduced padding from 160 to 80
 
 const centerX = canvas.width / 2;
 const centerY = canvas.height / 2;
@@ -34,8 +34,8 @@ window.addEventListener('resize', () => {
     const newSideLength = Math.min(window.innerWidth * 0.6, 400); // Match the new dimensions
     const newHeight = (Math.sqrt(3) / 2) * newSideLength;
     
-    canvas.width = newSideLength + 160;  // Match new padding
-    canvas.height = newHeight + 160;     // Match new padding
+    canvas.width = newSideLength + 80;  // Match new reduced padding
+    canvas.height = newHeight + 80;     // Match new reduced padding
     
     const newCenterX = canvas.width / 2;
     const newCenterY = canvas.height / 2;
@@ -50,6 +50,7 @@ window.addEventListener('resize', () => {
     triangleCentroid.y = (triangle[0].y + triangle[1].y + triangle[2].y) / 3;
     
     redrawCanvas();
+    updateLabelPositions(); // Add this line
 });
 
 let config = null;
@@ -95,6 +96,7 @@ async function initializeApp() {
     fetchUserLocation();
 
     redrawCanvas();
+    updateLabelPositions(); // Add this line
 }
 
 async function fetchUserLocation() { // Renamed function from fetchUserCountry to fetchUserLocation
@@ -102,6 +104,20 @@ async function fetchUserLocation() { // Renamed function from fetchUserCountry t
         const response = await fetch('https://ipapi.co/json/');
         if (!response.ok) throw new Error('Network response was not ok');
         const data = await response.json();
+        
+        // Check if IP is localhost/private
+        const isLocalhost = ['localhost', '127.0.0.1', '::1'].includes(data.ip) || 
+                          data.ip.startsWith('192.168.') || 
+                          data.ip.startsWith('10.') || 
+                          data.ip.startsWith('172.');
+        
+        if (isLocalhost) {
+            // Use Portugal for localhost
+            userCountry = 'Portugal';
+            locationInfoElement.innerHTML = `<img src="https://flagcdn.com/24x18/pt.png" alt="Portugal flag" width="24" height="18" style="margin-right: 8px;">Your location: Portugal`;
+            return;
+        }
+        
         const location = data.country_name || 'Unknown'; // Renamed variable from country to location
         const countryCode = data.country.toLowerCase(); // Get country code in lowercase
         const flagUrl = `https://flagcdn.com/24x18/${countryCode}.png`; // Flag URL with size 24x18
@@ -109,8 +125,10 @@ async function fetchUserLocation() { // Renamed function from fetchUserCountry t
         userCountry = location; // Store the country name
         locationInfoElement.innerHTML = `<img src="${flagUrl}" alt="${location} flag" width="24" height="18" style="margin-right: 8px;">Your location: ${location}`; // Updated text
     } catch (error) {
+        // Use Portugal as fallback
         console.error('Error fetching location:', error); // Updated error message
-        locationInfoElement.textContent = 'Unable to determine your location'; // Updated text
+        userCountry = 'Portugal';
+        locationInfoElement.innerHTML = `<img src="https://flagcdn.com/24x18/pt.png" alt="Portugal flag" width="24" height="18" style="margin-right: 8px;">Your location: Portugal`;
     }
 }
 
@@ -130,9 +148,14 @@ function drawLabels(proximities = []) {
     ctx.fillStyle = '#ffffff'; // Bright white for text
     ctx.font = "bold 16px Arial"; // Make font bold for better visibility
     labels.forEach((label, index) => {
+        const pos = triangle[index];
+        const labelPos = {
+            x: pos.x + (label.align === 'right' ? -8 : label.align === 'left' ? 8 : 0), // Reduced offset from 10 to 8
+            y: pos.y + (label.baseline === 'bottom' ? -16 : 16) // Reduced offset from 20 to 16
+        };
         ctx.textAlign = label.align;
         ctx.textBaseline = label.baseline;
-        ctx.fillText(label.text, label.x, label.y);
+        ctx.fillText(label.text, labelPos.x, labelPos.y);
     });
 }
 
@@ -177,7 +200,72 @@ function calculateProximity(x1, y1, x2, y2) {
     return Math.min(Math.max(Math.round(scaledProximity), 1), 10);
 }
 
+let isDragging = false;
+
+function handleMouseDown(event) {
+    if (!selectedPoint) return;
+    
+    const rect = canvas.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+    
+    // Check if click is near the selected point
+    const dx = x - selectedPoint.x;
+    const dy = y - selectedPoint.y;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+    
+    if (distance <= 10) { // 10px radius for easier selection
+        isDragging = true;
+        canvas.style.cursor = 'grabbing';
+    }
+}
+
+function handleMouseMove(event) {
+    if (!isDragging) return;
+    
+    const rect = canvas.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+    
+    if (isPointInTriangle(x, y)) {
+        selectedPoint = { x, y };
+        redrawCanvas();
+    }
+}
+
+function handleMouseUp() {
+    if (isDragging) {
+        isDragging = false;
+        canvas.style.cursor = 'default';
+    }
+}
+
+// Update canvas style for hover effect
+function updateCursor(event) {
+    if (isDragging) return;
+    
+    const rect = canvas.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+    
+    if (selectedPoint) {
+        const dx = x - selectedPoint.x;
+        const dy = y - selectedPoint.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        canvas.style.cursor = distance <= 10 ? 'grab' : 'default';
+    }
+}
+
+// Add event listeners
+canvas.addEventListener('mousedown', handleMouseDown);
+canvas.addEventListener('mousemove', handleMouseMove);
+canvas.addEventListener('mouseup', handleMouseUp);
+canvas.addEventListener('mouseleave', handleMouseUp);
+canvas.addEventListener('mousemove', updateCursor);
+
 function handleClick(event) {
+    if (isDragging) return; // Don't handle clicks while dragging
+    
     const rect = canvas.getBoundingClientRect();
     const x = event.clientX - rect.left;
     const y = event.clientY - rect.top;
@@ -242,15 +330,13 @@ function redrawCanvas() {
         const proximities = triangle.map((vertex) => {
             return calculateProximity(selectedPoint.x, selectedPoint.y, vertex.x, vertex.y);
         });
-        drawLabels(proximities);
         updateProximitySymbols(proximities);
 
-        ctx.fillStyle = '#4a9eff'; // Brighter blue for selected point
+        ctx.fillStyle = '#90EE90'; // Changed from '#4a9eff' to light green
         ctx.beginPath();
         ctx.arc(selectedPoint.x, selectedPoint.y, 5, 0, 2 * Math.PI);
         ctx.fill();
     } else {
-        drawLabels();
         updateProximitySymbols();
     }
 }
@@ -319,3 +405,33 @@ showResultsBtn.addEventListener('click', () => {
 canvas.addEventListener('click', handleClick);
 submitBtn.addEventListener('click', handleSubmit);
 initializeApp();
+
+function updateLabelPositions() {
+    const labelSalary = document.getElementById('labelSalary');
+    const labelPeople = document.getElementById('labelPeople');
+    const labelWork = document.getElementById('labelWork');
+    
+    // Set label texts
+    labelSalary.textContent = labels[0].text;
+    labelPeople.textContent = labels[1].text;
+    labelWork.textContent = labels[2].text;
+
+    // Calculate absolute positions
+    const canvasRect = canvas.getBoundingClientRect();
+    const containerRect = canvas.parentElement.getBoundingClientRect();
+    const offsetX = canvasRect.left - containerRect.left;
+    const offsetY = canvasRect.top - containerRect.top;
+
+    // Position labels
+    // Top vertex (Salary)
+    labelSalary.style.left = `${triangle[0].x + offsetX}px`;
+    labelSalary.style.top = `${triangle[0].y + offsetY - 20}px`;
+
+    // Bottom left vertex (People)
+    labelPeople.style.left = `${triangle[1].x + offsetX - 20}px`;
+    labelPeople.style.top = `${triangle[1].y + offsetY + 20}px`;
+
+    // Bottom right vertex (Work)
+    labelWork.style.left = `${triangle[2].x + offsetX + 20}px`;
+    labelWork.style.top = `${triangle[2].y + offsetY + 20}px`;
+}

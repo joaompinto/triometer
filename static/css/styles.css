@@ -38,7 +38,8 @@ header#topBar {
 canvas {
     max-width: 100%;
     height: auto !important;
-    /* Remove the filter: invert(0.9) line */
+    margin: 10px 0; /* Add small vertical margin */
+    touch-action: none; /* Prevent scrolling on touch devices */
 }
 
 #submitBtn {
@@ -93,7 +94,7 @@ canvas {
 }
 
 #info {
-    margin-top: -40px; /* Moved up by 10px */
+    margin-top: -30px; /* Reduced from -40px to match smaller canvas */
     margin-bottom: 10px;
     font-size: 14px;
     color: #b0b0b0;
@@ -106,8 +107,8 @@ canvas {
 }
 
 #locationInfo { /* Renamed from #countryInfo to #locationInfo */
-    margin-top: 10px; /* Added top margin */
-    margin-bottom: 20px;
+    margin-top: 5px; /* Reduced from 10px */
+    margin-bottom: 10px; /* Reduced from 20px */
     font-size: 16px;
     color: #b0b0b0;
     display: flex;
@@ -354,4 +355,18 @@ h1 {
 
 .toggle-table-btn[aria-expanded="true"] .toggle-icon {
     transform: rotate(180deg);
+}
+
+.vertex-label {
+    position: absolute;
+    color: #ffffff;
+    font-size: 16px;
+    font-weight: bold;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+}
+
+#canvasContainer {
+    position: relative;
+    margin: 10px 0;
 }
