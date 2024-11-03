@@ -26,9 +26,12 @@ class Selection(SQLModel, table=True):
     people: int
     work: int
 
-# Create the database engine
-DATABASE_URL = "sqlite:///database.db"
-engine = create_engine(DATABASE_URL, echo=True)
+# Update database configuration
+DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///database.db")
+if DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+
+engine = create_engine(DATABASE_URL, echo=False)  # Changed echo to False
 
 # Create the database tables
 SQLModel.metadata.create_all(engine)

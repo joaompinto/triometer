@@ -120,14 +120,15 @@ function drawTriangle() {
     ctx.lineTo(triangle[1].x, triangle[1].y);
     ctx.lineTo(triangle[2].x, triangle[2].y);
     ctx.closePath();
+    ctx.strokeStyle = '#ffffff'; // Bright white for triangle edges
+    ctx.lineWidth = 2; // Make the lines thicker
     ctx.stroke();
+    ctx.lineWidth = 1; // Reset line width
 }
 
 function drawLabels(proximities = []) {
-    // Removed canvas-based title drawing
-
-    // Draw vertex labels
-    ctx.font = "16px Arial";
+    ctx.fillStyle = '#ffffff'; // Bright white for text
+    ctx.font = "bold 16px Arial"; // Make font bold for better visibility
     labels.forEach((label, index) => {
         ctx.textAlign = label.align;
         ctx.textBaseline = label.baseline;
@@ -138,17 +139,16 @@ function drawLabels(proximities = []) {
 function drawCenterDot() {
     ctx.beginPath();
     ctx.arc(triangleCentroid.x, triangleCentroid.y, 3, 0, 2 * Math.PI);
-    ctx.fillStyle = 'blue';
+    ctx.fillStyle = '#4a9eff'; // Brighter blue for center dot
     ctx.fill();
-    ctx.fillStyle = 'black';
 }
 
 function drawCenterLines() {
     ctx.beginPath();
     ctx.setLineDash([5, 5]);
-    ctx.strokeStyle = 'rgba(0, 0, 255, 0.4)'; // More transparent blue
+    ctx.strokeStyle = 'rgba(74, 158, 255, 0.6)'; // Brighter blue with more opacity
+    ctx.lineWidth = 1.5; // Slightly thicker lines
     
-    // Draw lines from vertices to centroid
     triangle.forEach(vertex => {
         ctx.moveTo(vertex.x, vertex.y);
         ctx.lineTo(triangleCentroid.x, triangleCentroid.y);
@@ -156,7 +156,8 @@ function drawCenterLines() {
     
     ctx.stroke();
     ctx.setLineDash([]);
-    ctx.strokeStyle = 'black';
+    ctx.lineWidth = 1; // Reset line width
+    ctx.strokeStyle = '#ffffff'; // Reset stroke style
 }
 
 function isPointInTriangle(px, py) {
@@ -244,6 +245,7 @@ function redrawCanvas() {
         drawLabels(proximities);
         updateProximitySymbols(proximities);
 
+        ctx.fillStyle = '#4a9eff'; // Brighter blue for selected point
         ctx.beginPath();
         ctx.arc(selectedPoint.x, selectedPoint.y, 5, 0, 2 * Math.PI);
         ctx.fill();

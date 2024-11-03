@@ -1,3 +1,7 @@
+// Update Chart.js defaults for dark theme
+Chart.defaults.color = '#e0e0e0';
+Chart.defaults.borderColor = '#4a4a4a';
+
 async function fetchResults() {
     try {
         const response = await fetch('/api/results');
@@ -23,10 +27,15 @@ function initializeTableToggles() {
         btn.addEventListener('click', () => {
             const targetId = btn.getAttribute('data-target');
             const tableContainer = document.getElementById(targetId);
+            const chartContainer = btn.closest('.chart-container');
             const isCollapsed = tableContainer.classList.contains('collapsed');
             
             // Toggle the collapsed state
             tableContainer.classList.toggle('collapsed');
+            tableContainer.classList.toggle('expanded');
+            
+            // Toggle the chart container expanded state
+            chartContainer.classList.toggle('table-expanded');
             
             // Update button text and aria-expanded
             btn.setAttribute('aria-expanded', isCollapsed ? 'true' : 'false');
@@ -53,7 +62,7 @@ function createParticipantsChart(data) {
             labels: data.map(d => d.country),
             datasets: [{
                 data: data.map(d => d.participantCount),
-                backgroundColor: 'rgba(54, 162, 235, 0.8)'
+                backgroundColor: 'rgba(102, 179, 255, 0.8)'  // Light blue
             }]
         },
         options: {
@@ -64,7 +73,15 @@ function createParticipantsChart(data) {
             scales: {
                 y: {
                     beginAtZero: true,
-                    title: { display: true, text: 'Number of Participants' }
+                    title: { display: true, text: 'Number of Participants' },
+                    grid: {
+                        color: '#4a4a4a'
+                    }
+                },
+                x: {
+                    grid: {
+                        color: '#4a4a4a'
+                    }
                 }
             }
         }
@@ -90,22 +107,22 @@ function createMotivationsChart(data) {
         {
             label: 'Salary',
             data: data.map(country => country.proximities.find(p => p.label === 'Salary').average),
-            backgroundColor: 'rgba(255, 99, 132, 0.8)',
-            borderColor: 'rgba(255, 99, 132, 1)',
+            backgroundColor: 'rgba(255, 107, 107, 0.8)', // Red
+            borderColor: 'rgba(255, 107, 107, 1)',
             borderWidth: 1
         },
         {
             label: 'People',
             data: data.map(country => country.proximities.find(p => p.label === 'People').average),
-            backgroundColor: 'rgba(54, 162, 235, 0.8)',
-            borderColor: 'rgba(54, 162, 235, 1)',
+            backgroundColor: 'rgba(102, 179, 255, 0.8)', // Blue
+            borderColor: 'rgba(102, 179, 255, 1)',
             borderWidth: 1
         },
         {
             label: 'Work',
             data: data.map(country => country.proximities.find(p => p.label === 'Work').average),
-            backgroundColor: 'rgba(75, 192, 192, 0.8)',
-            borderColor: 'rgba(75, 192, 192, 1)',
+            backgroundColor: 'rgba(72, 207, 173, 0.8)', // Green
+            borderColor: 'rgba(72, 207, 173, 1)',
             borderWidth: 1
         }
     ];
@@ -127,6 +144,9 @@ function createMotivationsChart(data) {
                     title: {
                         display: true,
                         text: 'Country'
+                    },
+                    grid: {
+                        color: '#4a4a4a'
                     }
                 },
                 y: {
@@ -136,7 +156,10 @@ function createMotivationsChart(data) {
                         text: 'Average Motivation Score'
                     },
                     beginAtZero: true,
-                    max: maxValue // Dynamic maximum value
+                    max: maxValue, // Dynamic maximum value
+                    grid: {
+                        color: '#4a4a4a'
+                    }
                 }
             },
             plugins: {
@@ -197,9 +220,9 @@ function createGlobalChart(data) {
                     globalAverages.work / globalAverages.total
                 ],
                 backgroundColor: [
-                    'rgba(255, 99, 132, 0.8)',
-                    'rgba(54, 162, 235, 0.8)',
-                    'rgba(75, 192, 192, 0.8)'
+                    'rgba(255, 107, 107, 0.8)', // Red
+                    'rgba(102, 179, 255, 0.8)', // Blue
+                    'rgba(72, 207, 173, 0.8)'   // Green
                 ]
             }]
         },
