@@ -8,6 +8,11 @@ from collections import defaultdict
 import os
 import re
 from sqlalchemy.pool import QueuePool
+import logging
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 app = FastAPI()
 
@@ -84,7 +89,20 @@ def init_db():
 # Initialize database on startup
 @app.on_event("startup")
 async def on_startup():
-    init_db()
+    logger.info("Starting application...")
+    
+    # Log database configuration
+    logger.info(f"Database URL: {mask_database_url(DATABASE_URL)}")
+    logger.info(f"Production mode: {os.environ.get('PRODUCTION', 'false')}")
+    
+    try:
+        init_db()
+        logger.info("Database initialized successfully")
+    except Exception as e:
+        logger.error(f"Database initialization failed: {e}")
+        raise
+
+    logger.info("Application startup complete")
 
 # Mount static files - update the mounting structure
 app.mount("/static", StaticFiles(directory="static"), name="static")
